@@ -7,7 +7,6 @@ from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler
 import logging
 import sys
-from classes import *
 import os
 
 KEY = sys.argv[1]
@@ -18,15 +17,8 @@ logging.basicConfig(filename='logfile.log', level=logging.INFO, format='%(asctim
 
 client = boto3.client('polly')
 tracks_dir = '/home/ec2-user/speechBot/tracks'
-
-
-# def testmp3(bot, update):
-#     full_name = os.path.join(tracks_dir, "polly-boto.mp3")
-#     track = open(full_name, 'rb')
-#     bot.sendAudio(chat_id=update.message.chat_id, audio=track)
-
-
 chosen_language = 'Maxim'
+language_keys = {'Brian': 'англійську', 'Hans': 'німецьку', 'Maxim': 'російську', 'Giorgio': 'італійську', }
 
 
 def speech(bot, update):
@@ -41,9 +33,11 @@ def speech(bot, update):
     )
 
     if "AudioStream" in response:
+        global output
         with closing(response["AudioStream"]) as stream:
-            output = tracks_dir + '/' + str(track_count) + " track-boto.mp3"
+            #            output = tracks_dir + '/' + str(track_count) + " track-boto.mp3"
 
+            output = os.path.join(tracks_dir, str(track_count) + " track-boto.mp3")
             try:
                 # Open a file for writing the output as a binary stream
                 with open(output, "wb") as file:
@@ -53,8 +47,8 @@ def speech(bot, update):
                 print(error)
                 sys.exit(-1)
 
-    full_name = os.path.join(tracks_dir, str(track_count) + " track-boto.mp3")
-    track = open(full_name, 'rb')
+    #    full_name = os.path.join(tracks_dir, str(track_count) + " track-boto.mp3")
+    track = open(output, 'rb')
 
     bot.sendAudio(chat_id=update.message.chat_id, audio=track)
 
@@ -70,36 +64,44 @@ def start_command(bot, update):
                     text='<b>Бот конвертує текст в аудіо. Зараз мова Російська, можеш вибрати іншу</b>')
 
 
+# def set_language(bot, update):
+#     global chosen_language
+#     chosen_language = update.callback_query.data
+#     if chosen_language == 'Brian':
+#         bot.editMessageText(
+#             text='Ти обрав <b>англійську</b>. Пиши боту текст, і він пришле аудіо англійською.',
+#             chat_id=update.callback_query.message.chat_id, message_id=update.callback_query.message.message_id,
+#             parse_mode=ParseMode.HTML)
+#     elif chosen_language == 'Hans':
+#         bot.editMessageText(
+#             text='Ти обрав <b>німецьку</b>. Пиши боту текст, і він пришле аудіо німецькою.',
+#             chat_id=update.callback_query.message.chat_id, message_id=update.callback_query.message.message_id,
+#             parse_mode=ParseMode.HTML)
+#     elif chosen_language == 'Maxim':
+#         bot.editMessageText(
+#             text='Ти обрав <b>російську</b>. Пиши боту текст, і він пришле аудіо російською.',
+#             chat_id=update.callback_query.message.chat_id, message_id=update.callback_query.message.message_id,
+#             parse_mode=ParseMode.HTML)
+#     elif chosen_language == 'Giorgio':
+#         bot.editMessageText(
+#             text='Ти обрав <b>італійську</b>. Пиши боту текст, і він пришле аудіо італійською.',
+#             chat_id=update.callback_query.message.chat_id, message_id=update.callback_query.message.message_id,
+#             parse_mode=ParseMode.HTML)
+
+
 def set_language(bot, update):
     global chosen_language
     chosen_language = update.callback_query.data
-    if chosen_language == 'Brian':
-        bot.editMessageText(
-            text='Ти обрав <b>англійську</b>. Пиши боту текст, і він пришле аудіо англійською.',
-            chat_id=update.callback_query.message.chat_id, message_id=update.callback_query.message.message_id,
-            parse_mode=ParseMode.HTML)
-    elif chosen_language == 'Hans':
-        bot.editMessageText(
-            text='Ти обрав <b>німецьку</b>. Пиши боту текст, і він пришле аудіо німецькою.',
-            chat_id=update.callback_query.message.chat_id, message_id=update.callback_query.message.message_id,
-            parse_mode=ParseMode.HTML)
-    elif chosen_language == 'Maxim':
-        bot.editMessageText(
-            text='Ти обрав <b>російську</b>. Пиши боту текст, і він пришле аудіо російською.',
-            chat_id=update.callback_query.message.chat_id, message_id=update.callback_query.message.message_id,
-            parse_mode=ParseMode.HTML)
-    elif chosen_language == 'Giorgio':
-        bot.editMessageText(
-            text='Ти обрав <b>італійську</b>. Пиши боту текст, і він пришле аудіо італійською.',
-            chat_id=update.callback_query.message.chat_id, message_id=update.callback_query.message.message_id,
-            parse_mode=ParseMode.HTML)
+    bot.editMessageText(
+        text='Ти обрав <b>{}</b>. Пиши текст, і бот пришле аудіо цією мовою.'.format(language_keys[chosen_language]),
+        chat_id=update.callback_query.message.chat_id, message_id=update.callback_query.message.message_id,
+        parse_mode=ParseMode.HTML)
 
 
 def main():
     updater = Updater(KEY)
     dispatcher = updater.dispatcher
 
-    #dispatcher.add_handler(MessageHandler(filter_testmp3, testmp3))
     dispatcher.add_handler(MessageHandler(Filters.text, speech))
     dispatcher.add_handler(CommandHandler("start", start_command))
     dispatcher.add_handler(CallbackQueryHandler(set_language))
