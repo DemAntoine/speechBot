@@ -17,7 +17,7 @@ logging.basicConfig(filename='logfile.log', level=logging.INFO, format='%(asctim
                     datefmt='%Y-%m-%d %H:%M:%S')
 
 client = boto3.client('polly')
-tracks_dir = '/home/ec2-user/test'
+tracks_dir = '/home/ec2-user/speechBot/tracks'
 
 
 # def testmp3(bot, update):
