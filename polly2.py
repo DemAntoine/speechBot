@@ -3,7 +3,6 @@
 
 import boto3
 from contextlib import closing
-
 from telegram import ParseMode
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import logging
