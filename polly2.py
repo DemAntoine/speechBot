@@ -42,7 +42,7 @@ def speech(bot, update):
 
     if "AudioStream" in response:
         with closing(response["AudioStream"]) as stream:
-            output = str(track_count) + " track-boto.mp3"
+            output = tracks_dir + '/' + str(track_count) + " track-boto.mp3"
 
             try:
                 # Open a file for writing the output as a binary stream
