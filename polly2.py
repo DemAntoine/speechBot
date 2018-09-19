@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# !/usr/bin/python
+# !/usr/local/bin/python3
 
 import boto3
 from contextlib import closing
