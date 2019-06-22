@@ -37,17 +37,17 @@ def speech(bot, update):
     )
 
     if "AudioStream" in response:
-        with closing(response["AudioStream"]) as stream:
-            output = os.path.join(tracks_dir, str(track_count) + " track-boto.mp3")
-            try:
+        try:
+            with closing(response["AudioStream"]) as stream:
+                output = os.path.join(tracks_dir, str(track_count) + " track-boto.mp3")
                 # Open a file for writing the output as a binary stream
                 with open(output, "wb") as file:
                     file.write(stream.read())
                     track = open(output, 'rb')
-                    bot.sendAudio(chat_id=update.message.chat_id, audio=track)
-            except IOError as error:
-                print(error)
-                sys.exit(-1)
+            bot.sendAudio(chat_id=update.message.chat_id, audio=track)
+        except IOError as error:
+            print(error)
+            sys.exit(-1)
 
 
 def start_command(bot, update):
