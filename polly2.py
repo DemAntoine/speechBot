@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-# !/usr/local/bin/python3
-
 import boto3
 from contextlib import closing
 from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
@@ -10,13 +8,19 @@ import sys
 import os
 
 KEY = sys.argv[1]
-print('key ' + KEY[:8] + '... successfully used')
+aws_access_key_id = sys.argv[2]
+aws_secret_access_key = sys.argv[3]
+print('key... ' + KEY[-6:] + ' successfully used')
 
 logging.basicConfig(filename='logfile.log', level=logging.INFO, format='%(asctime)s %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S')
 
-client = boto3.client('polly')
-tracks_dir = '/home/ec2-user/speechBot/tracks'
+client = boto3.client('polly',
+                      region_name='us-east-2',
+                      aws_access_key_id=aws_access_key_id,
+                      aws_secret_access_key=aws_secret_access_key)
+# tracks_dir = '/home/ec2-user/speechBot/tracks'
+tracks_dir = os.path.join(os.getcwd(), 'tracks')
 chosen_language = 'Maxim'
 language_keys = {'Brian': 'англійську', 'Hans': 'німецьку', 'Maxim': 'російську', 'Giorgio': 'італійську', }
 
@@ -33,19 +37,17 @@ def speech(bot, update):
     )
 
     if "AudioStream" in response:
-        global output
         with closing(response["AudioStream"]) as stream:
             output = os.path.join(tracks_dir, str(track_count) + " track-boto.mp3")
             try:
                 # Open a file for writing the output as a binary stream
                 with open(output, "wb") as file:
                     file.write(stream.read())
+                    track = open(output, 'rb')
+                    bot.sendAudio(chat_id=update.message.chat_id, audio=track)
             except IOError as error:
                 print(error)
                 sys.exit(-1)
-
-    track = open(output, 'rb')
-    bot.sendAudio(chat_id=update.message.chat_id, audio=track)
 
 
 def start_command(bot, update):
