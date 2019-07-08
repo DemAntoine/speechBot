@@ -81,24 +81,17 @@ def langs(update, context, chosen_language):
     langs_arr[update.effective_user.id] = chosen_language
 
 
-def catch_err(update, context, error):
-    """handle all telegram errors end send report"""
-    log.info(f'user_id: {update.effective_user.id} name: {update.effective_user.username} {type(error)}')
+def catch_err(bot, update, error):
+    """handle all telegram errors end send report. There is no 'update' so can't logging much info"""
+    user_id = update.effective_user.id if update else 'no update'
     try:
         raise error
     except Unauthorized:
-        context.bot.sendMessage(chat_id=3680016,
-                                text=f'ERROR:\n {error}\n type {type(error)}\n user_id {update.effective_user.id}')
+        bot.sendMessage(chat_id=3680016, text=f'ERROR:\n {error}\n type {type(error)} id: {user_id}')
     except BadRequest:
-        try:
-            context.bot.sendMessage(chat_id=3680016, text=f'ERROR:\n {error}\n type {type(error)}')
-        except:
-            log.info('*' * 100)
+        bot.sendMessage(chat_id=3680016, text=f'ERROR:\n {error}\n type {type(error)} id: {user_id}')
     except (TimedOut, NetworkError, TelegramError):
-        context.bot.sendMessage(chat_id=3680016,
-                                text=f'ERROR:\n {error}\n type {type(error)}\n user_id {update.effective_user.id}')
-        context.bot.sendPhoto(chat_id=update.effective_user.id, photo=open(os.path.join('img', 'error.jpg'), 'rb'),
-                              caption=f'Щось пішло не так... Спробуйте ще раз.')
+        bot.sendMessage(chat_id=3680016, text=f'ERROR:\n {error}\n type {type(error)} id: {user_id}')
 
 
 def main():
