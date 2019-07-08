@@ -26,6 +26,7 @@ language_keys = {'Brian': 'англійську', 'Hans': 'німецьку', 'M
 
 
 def speech(update, context):
+    log.info(f'user_id: {update.effective_user.id} name: {update.effective_user.full_name}')
     text = update.message.text
     track_count = len(os.listdir(tracks_dir))
 
@@ -46,7 +47,8 @@ def speech(update, context):
                     track = open(output, 'rb')
             context.bot.sendAudio(chat_id=update.message.chat_id, audio=track)
         except IOError as error:
-            print(error)
+            log.info(f'user_id: {update.effective_user.id} name: {update.effective_user.full_name} {error} appear')
+            # print(error)
             sys.exit(-1)
 
 
